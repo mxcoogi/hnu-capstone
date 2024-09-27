@@ -32,10 +32,13 @@ def login_required(f):
 
 
 
-def create_endpoint(app, services):
+def create_endpoints(app, services):
     app.json_encoder = CustomJSONEncoder
     user_service = services.user_service
 
+    @app.route("/ping", methods = ['GET'])
+    def ping():
+        return "pong"
     @app.route("/sign-up", methods = ['POST'])
     def sign_up():
         new_user = request.json

@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 from model import UserDao
 from service import UserService
-from view import create_endpoint
+from view import create_endpoints
 
 
 class Services:
@@ -33,7 +33,7 @@ def create_app(test_config = None):
     services = Services
     services.user_service = UserService(user_dao, app.config)
 
-    create_endpoint(app, services)
+    create_endpoints(app, services)
 
     return app
 

@@ -10,7 +10,7 @@ class UserDao:
                 INSERT INTO users(
                     student_id,
                     name,
-                    hashed_password,
+                    hashed_password
                 ) VALUES(
                     :student_id,
                     :name,
@@ -19,15 +19,16 @@ class UserDao:
             """), user).lastrowid
 
             connection.commit()
+        
 
-    def get_user_id_and_password(self, email):
+    def get_user_id_and_password(self, student_id):
         with self.db.connect() as connection:
             row = connection.execute(text(
                 'SELECT student_id, hashed_password FROM users WHERE student_id = :student_id'
-            ), {'email' : email}).fetchone()
+            ), {'student_id' : student_id}).fetchone()
 
         return {
-            'id' : row[0],
+            'student_id' : row[0],
             'hashed_password' : row[1]
         } if row else None
 

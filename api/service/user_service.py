@@ -33,5 +33,5 @@ class UserService:
         }
         token = jwt.encode(payload, self.config['JWT_SECRET_KEY'], 'HS256')
 
-        return token.decode('UTF-8')
+        return token
     
