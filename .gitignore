@@ -1,3 +1,4 @@
 generate_std/
 api/config.py
 __pycache__/
+api/nohup.out
