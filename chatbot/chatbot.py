@@ -1,5 +1,4 @@
-from common import client, model
-from pprint import pprint
+from common import client
 
 class Chatbot:
 

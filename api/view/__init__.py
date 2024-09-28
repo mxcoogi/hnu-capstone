@@ -3,6 +3,7 @@ from flask import request, jsonify, current_app, Response, g
 from flask.json import JSONEncoder
 from functools import wraps
 
+
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):

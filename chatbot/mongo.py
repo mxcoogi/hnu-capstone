@@ -1,6 +1,6 @@
 from pymongo import MongoClient
-import pandas as pd
 from chatbot.to_vector import to_vector
+import pandas as pd
 client = MongoClient(host = 'localhost', port = 27017)
 #print(client.list_database_names())
 db = client['local']

@@ -1,4 +1,5 @@
-generate_std/
+chatbot/generate_std/
 api/config.py
 __pycache__/
 api/nohup.out
+chatbot/config.py
