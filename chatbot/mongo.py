@@ -1,27 +1,29 @@
 from pymongo import MongoClient
-from chatbot.to_vector import to_vector
 import pandas as pd
-client = MongoClient(host = 'localhost', port = 27017)
-#print(client.list_database_names())
+
+# MongoDB 연결
+client = MongoClient(host='localhost', port=27017)
 db = client['local']
 collection = db['hnu']
 
-data = {
-	'title' : 'value',
-	'date': 'YYYY-MM-DD hh:mm',
-	'content' : 'value',
-	'category' : 'value',
-    'link' : 'link'    
-}
-df = pd.read_csv('./data/announcement_hnu2.csv', encoding='utf-8').head()
+# 데이터 로드
+df = pd.read_csv('./data/announcement_hnu2.csv', encoding='utf-8')
+
+
+# 데이터 리스트 준비
 ls = []
 for index, row in df.iterrows():
     data = {
-	'title' : row['title'],
-	'date': row['date'],
-	'content' : row['content'],
-	'category' : row['category'],
-    'link' : row['link']    
+        'title': row['title'],
+        'date': row['date'],
+        'content': row['content'],
+        'category': row['category'],
+        'link': row['link'],
     }
-    res = to_vector(data)
-    ls.append(res)
+    ls.append(data)
+
+if ls:
+    res = collection.insert_many(ls)
+    print('complete')
+else:
+    print('No data')

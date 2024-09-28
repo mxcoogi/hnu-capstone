@@ -4,8 +4,11 @@ import requests
 from pprint import pprint 
 from tavily import TavilyClient
 import config
+import numpy as np
+from common import index, embeddings_function, texts
 
 tavily = TavilyClient(api_key=config.tavily)
+
 
 #위도 경도
 global_lat_lon = { 
@@ -49,6 +52,21 @@ def search_internet(**kwargs):
     print("answer",answer)
     return answer
 
+def search_database(search_query, top_k=3):
+    # 쿼리 벡터화
+    query_vector = np.array(embeddings_function.embed_query(search_query)).astype('float32').reshape(1, -1)
+    
+    # 가장 가까운 공지 검색
+    D, I = index.search(query_vector, k=top_k)
+    
+    # 결과 출력: 원문 데이터 반환
+    results = []
+    for i in I[0]:
+        results.append({'text': texts[i]})
+    
+    return results
+
+
 tools = [
             {
                 "type": "function",
@@ -83,7 +101,26 @@ tools = [
                         "required": ["search_query"],
                     }
                 }
-            }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "search_database",
+                    "description": "답변시 학사관련 정보가 필요하다고 판단되는 경우 전체 문장을 키워드로 하여 학교 정보를 검색",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "search_query": {
+                                "type": "string",
+                                "description": "학교 정보를 검색하기 위한 전체 문장",
+                            }
+                        },
+                        "required": ["search_query"],
+                    }
+                }
+            },
+            
+
         ]
 
 
@@ -93,6 +130,7 @@ class FunctionCalling:
         self.available_functions = {
             "get_celsius_temperature": get_celsius_temperature,
             "search_internet": search_internet,
+            "search_database" : search_database,
         }
         self.model = model
 

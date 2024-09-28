@@ -2,7 +2,24 @@ import config
 from openai import OpenAI
 from dataclasses import dataclass
 import pytz
-from datetime import datetime, timedelta
+from datetime import datetime
+import pickle
+import faiss
+from langchain_openai import OpenAIEmbeddings
+import config
+
+# FAISS 인덱스 로드
+index = faiss.read_index('faiss_index.index')
+
+# 원본 데이터 로드
+with open('notices.pkl', 'rb') as f:
+    id_text_pairs = pickle.load(f)
+
+embeddings_function = OpenAIEmbeddings(
+    model='text-embedding-3-large', 
+    openai_api_key=config.api_key
+)
+ids, texts = zip(*id_text_pairs)
 
 def today():
     korea = pytz.timezone('Asia/Seoul')

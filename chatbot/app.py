@@ -3,15 +3,19 @@ from chatbot import Chatbot
 from common import model
 from function_calling import FunctionCalling, tools 
 from characters import system_role, instruction
+from common import model
+
+app = Flask(__name__)
 
 hnu = Chatbot(
     model = model.basic,
     system_role = system_role,
     instruction = instruction
     )
-app = Flask(__name__)
 func_calling = FunctionCalling(model=model.basic)
 
+
+        
 @app.route("/chat-api", methods = ['POST'])
 def chat_api():
     request_message = request.json['request_message']
