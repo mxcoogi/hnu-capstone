@@ -3,3 +3,4 @@ api/config.py
 __pycache__/
 api/nohup.out
 chatbot/config.py
+chatbot/data/

@@ -1,13 +1,16 @@
-from common import client, model, makeup_response 
+from common import client, model, makeup_response, index, data, vectorize
 import json
 import requests
 from pprint import pprint 
 from tavily import TavilyClient
 import config
-import numpy as np
-from common import index, embeddings_function, texts
+from pymongo import MongoClient
 
+# 인덱스와 문서 로드
 tavily = TavilyClient(api_key=config.tavily)
+mongo_client = MongoClient(host='localhost', port=27017)
+db = mongo_client['local']
+collection = db['hnu']
 
 
 #위도 경도
@@ -21,8 +24,6 @@ global_lat_lon = {
            'Boston':[42.36, -71.05],
            '도쿄':[35.68, 139.69]
           }
-
-#화폐 코드
 
 def get_celsius_temperature(**kwargs):
     location = kwargs['location']
@@ -52,20 +53,18 @@ def search_internet(**kwargs):
     print("answer",answer)
     return answer
 
-def search_database(search_query, top_k=3):
-    # 쿼리 벡터화
-    query_vector = np.array(embeddings_function.embed_query(search_query)).astype('float32').reshape(1, -1)
-    
-    # 가장 가까운 공지 검색
-    D, I = index.search(query_vector, k=top_k)
-    
-    # 결과 출력: 원문 데이터 반환
-    results = []
-    for i in I[0]:
-        results.append({'text': texts[i]})
-    
-    return results
+def search_database(search_query):
+    query_vector = vectorize(search_query)
 
+    # FAISS 인덱스에서 유사 문서 찾기
+    D, I = index.search(query_vector.reshape(1, -1), k=5)  # 상위 5개 문서 검색
+    # 유사 문서 가져오기
+    similar_documents = [data[i] for i in I[0]]
+    res = ""
+    for doc in similar_documents:
+        res += doc['metadata']['title'] + doc['page_content'] + doc['metadata']['category'] + doc['metadata']['link'] + "\n"
+    
+    return res
 
 tools = [
             {
@@ -103,22 +102,23 @@ tools = [
                 }
             },
             {
-                "type": "function",
-                "function": {
-                    "name": "search_database",
-                    "description": "답변시 학사관련 정보가 필요하다고 판단되는 경우 전체 문장을 키워드로 하여 학교 정보를 검색",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "search_query": {
-                                "type": "string",
-                                "description": "학교 정보를 검색하기 위한 전체 문장",
-                            }
-                        },
-                        "required": ["search_query"],
-                    }
+    "type": "function",
+    "function": {
+        "name": "search_database",
+        "description": "답변 시 학교관련 정보가 필요하다고 판단되는 경우 수행",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "search_query": {
+                    "type": "string",
+                    "description": "학교 정보 을 위한 검색어 또는 문장",
                 }
             },
+            "required": ["search_query"],
+        }
+    }
+}
+
             
 
         ]

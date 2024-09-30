@@ -1,4 +1,4 @@
-from common import client, makeup_response
+from common import client, makeup_response, vectorize
 import math
 
 class Chatbot:

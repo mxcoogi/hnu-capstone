@@ -3,23 +3,10 @@ from openai import OpenAI
 from dataclasses import dataclass
 import pytz
 from datetime import datetime
-import pickle
-import faiss
-from langchain_openai import OpenAIEmbeddings
-import config
+import config, json, faiss
+import numpy as np
 
-# FAISS 인덱스 로드
-index = faiss.read_index('faiss_index.index')
 
-# 원본 데이터 로드
-with open('notices.pkl', 'rb') as f:
-    id_text_pairs = pickle.load(f)
-
-embeddings_function = OpenAIEmbeddings(
-    model='text-embedding-3-large', 
-    openai_api_key=config.api_key
-)
-ids, texts = zip(*id_text_pairs)
 
 def today():
     korea = pytz.timezone('Asia/Seoul')
@@ -54,3 +41,12 @@ class Model:
 
 model = Model();  
 client = OpenAI(api_key=config.api_key, timeout=30, max_retries=1)
+
+with open('./data/data.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+index = faiss.read_index('./data/faiss_index.index')
+
+def vectorize(text):
+    response = client.embeddings.create(input=text, model='text-embedding-ada-002')
+    return np.array(response.data[0].embedding).astype('float32')
