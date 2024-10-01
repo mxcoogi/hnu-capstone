@@ -23,8 +23,8 @@ def login_required(f):
             
             if payload is None: return Response(status=401)
 
-            user_id = payload['user_id']
-            g.user_id = user_id
+            student_id = payload['student_id']
+            g.student_id = student_id
         else:
             return Response(status=401)
 
@@ -53,12 +53,33 @@ def create_endpoints(app, services):
         authorized = user_service.login(credential)
 
         if authorized:
-            user_id = credential['student_id']
-            token = user_service.generate_access_token(user_id)
+            student_id = credential['student_id']
+            token = user_service.generate_access_token(student_id)
 
             return jsonify({
-                'user_id' : user_id,
+                'student_id' : student_id,
                 'access_token' : token
             })
         else:
             return '', 401
+        
+        
+    @app.route('/mypage', methods = ['GET'])
+    @login_required
+    def mypage():
+        student_id = g.student_id
+        user_info = user_service.user_info(student_id)
+        return user_info
+    
+    @app.route('/mypage', methods = ['POST'])
+    @login_required
+    def mypage():
+        student_id = g.student_id
+        payload = request.json # 유저 페이지 수정 해야댐 여기서부터!!!
+        user_info = user_service.user_info(student_id)
+        return user_info
+
+        
+
+
+    
