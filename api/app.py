@@ -5,15 +5,12 @@ from flask_cors import CORS
 from model import UserDao
 from service import UserService
 from view import create_endpoints
-
-
 class Services:
     pass
 
 
 def create_app(test_config = None):
     app = Flask(__name__)
-
     CORS(app)
 
     if test_config is None:

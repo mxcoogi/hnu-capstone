@@ -3,7 +3,6 @@ from flask import request, jsonify, current_app, Response, g
 from flask.json import JSONEncoder
 from functools import wraps
 
-
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
@@ -36,6 +35,7 @@ def login_required(f):
 def create_endpoints(app, services):
     app.json_encoder = CustomJSONEncoder
     user_service = services.user_service
+
 
     @app.route("/ping", methods = ['GET'])
     def ping():
@@ -71,15 +71,16 @@ def create_endpoints(app, services):
         user_info = user_service.user_info(student_id)
         return user_info
     
+    
     @app.route('/mypage', methods = ['POST'])
     @login_required
-    def mypage():
-        student_id = g.student_id
+    def edit_mypage():
         payload = request.json # 유저 페이지 수정 해야댐 여기서부터!!!
-        user_info = user_service.user_info(student_id)
-        return user_info
+        user_info = user_service.user_info(g.student_id)
+        for i in payload:
+            user_info[i] = payload[i]
+        edit_info = user_service.edit_user_info(user_info)
+        return edit_info
 
-        
-
-
+    
     

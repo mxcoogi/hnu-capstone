@@ -10,14 +10,13 @@ class Chatbot:
         self.max_token_size = 16 * 1024
         self.available_token_rate = 0.9
 
-    def add_user_message(self, message, student_info):
+    def add_user_message(self, message, payload):
+        student_info = ""
+        for i in payload:
+            student_info += f"{i} : {payload[i]} "
+        self.context.append({"role" : "system" , "content" : student_info})
         self.context.append({"role": "user", "content": message})
-        self.student_info = {
-            'name' : student_info['name'],
-            'student_id' : student_info['student_id'],
-            'grade' : student_info['grade']
-        }
-        self.context.append({"role" : "system" , "content" : f"name : {student_info['name']}, student_id : {student_info['student_id']}, grade : {student_info['grade']}, department : {student_info['department']}" })
+
 
     def _send_request(self):
         try:

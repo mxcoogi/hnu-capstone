@@ -27,10 +27,8 @@ class UserService:
         return authorized
     
     def generate_access_token(self, student_id):
-        payload = {
-            'student_id' : student_id,
-            'exp' : datetime.utcnow() + timedelta(seconds= 60 * 60 * 24)
-        }
+        payload = self.user_info(student_id)
+        payload['exp'] = datetime.utcnow() + timedelta(seconds= 60 * 60 * 24)
         token = jwt.encode(payload, self.config['JWT_SECRET_KEY'], 'HS256')
 
         return token
@@ -39,4 +37,7 @@ class UserService:
 
         user_info = self.user_dao.get_user_info(student_id)
         return user_info
-
+    
+    def edit_user_info(self, payload):
+        res = self.user_dao.edit_user_info(payload)
+        return res

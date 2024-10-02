@@ -4,6 +4,8 @@ from common import model
 from function_calling import FunctionCalling, tools 
 from characters import system_role, instruction
 from common import model
+import jwt
+import config
 
 app = Flask(__name__)
 
@@ -18,18 +20,17 @@ func_calling = FunctionCalling(model=model.basic)
         
 @app.route("/chat-api", methods = ['POST'])
 def chat_api():
+    access_token = request.headers.get('Authorization')
+    if access_token is None:
+        return '토큰이 필요합니다', 401
+    
+    try:
+        payload = jwt.decode(access_token, config.JWT_SECRET_KEY, 'HS256')
+    except jwt.InvalidTokenError:
+        return '사용자 확인 안댐', 401
+
     request_message = request.json['request_message']
-    user_name = request.json['name']
-    student_id = request.json['student_id']
-    grade = request.json['grade']
-    department = request.json['department']
-    student_info = {
-        'name' : user_name,
-        'student_id' : student_id,
-        'grade' : grade,
-        'department' : department
-    }
-    hnu.add_user_message(request_message, student_info)
+    hnu.add_user_message(request_message, payload)
     analyzed, analyzed_dict = func_calling.analyze(request_message, tools)
     if analyzed_dict.get("tool_calls"):
         response = func_calling.run(analyzed, analyzed_dict, hnu.context[:])
